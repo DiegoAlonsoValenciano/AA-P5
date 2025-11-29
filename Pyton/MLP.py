@@ -7,21 +7,18 @@ class MLP:
     Constructor: Computes MLP.
 
     Args:
-        inputLayer (int): size of input
-        hiddenLayer (int): size of hidden layer.
-        outputLayer (int): size of output layer
+        Layer (array): tamaños de las capas
         seed (scalar): seed of the random numeric.
         epislom (scalar) : random initialization range. e.j: 1 = [-1..1], 2 = [-2,2]...
     """
 
-    def __init__(self,inputLayer,hidenLayer, outputLayer, seed=0, epislom = 0.12):
+    def __init__(self,Layers, seed=0, epislom = 0.12):
         np.random.seed(seed)
         ## TO-DO
-        self.inputLayer = inputLayer
-        self.hidenLayer = hidenLayer
-        self.outputLayer = outputLayer
-        t1 = np.random.uniform(-epislom,epislom, [hidenLayer,inputLayer+1])
-        t2 = np.random.uniform(-epislom,epislom,[outputLayer,hidenLayer+1])
+        self.layers = Layers
+        self.thetas
+        t1 = np.random.uniform(-epislom,epislom, [Layers[1],Layers[0]+1])
+        t2 = np.random.uniform(-epislom,epislom,[Layers[2],Layers[1]+1])
         self.new_trained(t1,t2)
         """
     Reset the theta matrix created in the constructor by both theta matrix manualy loaded.
