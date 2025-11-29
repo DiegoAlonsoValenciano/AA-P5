@@ -16,10 +16,15 @@ class MLP:
         np.random.seed(seed)
         ## TO-DO
         self.layers = Layers
-        self.thetas
-        t1 = np.random.uniform(-epislom,epislom, [Layers[1],Layers[0]+1])
-        t2 = np.random.uniform(-epislom,epislom,[Layers[2],Layers[1]+1])
-        self.new_trained(t1,t2)
+        numL = len(Layers)
+        self.thetas =[]
+        for i in range(numL-1):
+            ts = np.random.uniform(-epislom,epislom, [Layers[i+1],Layers[i]+1])
+            self.thetas.append(ts)
+            print("theta",i,": ",ts," Tamaño: ",ts.shape)
+            
+        print("thetas: ", self.thetas)
+
         """
     Reset the theta matrix created in the constructor by both theta matrix manualy loaded.
 
@@ -73,13 +78,26 @@ class MLP:
     z2,z3 (array_like): signal fuction of two last layers
     """
     def feedforward(self,x):
+        a = []
+        z = []
         a1 = np.hstack([np.ones((self._size(x), 1)), x])
-        z2 = a1 @ self.theta1.T 
-        a2 = self._sigmoid(z2)
-        a2 = np.hstack([np.ones((self._size(a2), 1)), a2])
-        z3 = a2 @ self.theta2.T
-        a3 = self._sigmoid(z3)
-        return a1,a2,a3,z2,z3 # devolvemos a parte de las activaciones, los valores sin ejecutar la función de activación
+        a.append(a1)
+        print("a1: ", a1.shape, "esperado: ", x.shape[0],"x", x.shape[1]+1)
+        rango = len(self.thetas)
+        for i in range(rango-1):
+            auxZ = a[i] @ self.thetas[i].T
+            auxA = self._sigmoid(auxZ)
+            auxA = np.hstack([np.ones((self._size(auxA), 1)), auxA])
+            print("a", i+2, ": ", auxA.shape, "esperado: ", a[i].shape[0],"x", self.thetas[i].shape[0]+1)
+            z.append(auxZ)
+            a.append(auxA)
+        
+        auxZ = a[rango-1] @ self.thetas[rango-1].T
+        auxA = self._sigmoid(auxZ)
+        print("a", rango+1, ": ", auxA.shape, "esperado: ", a[rango-1].shape[0],"x", self.thetas[rango-1].shape[0])
+        z.append(auxZ)
+        a.append(auxA)
+        return a,z # devolvemos a parte de las activaciones, los valores sin ejecutar la función de activación
 
     """
     Computes only the cost of a previously generated output (private)

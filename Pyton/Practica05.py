@@ -10,7 +10,7 @@ from sklearn.preprocessing import StandardScaler
 def main():
 #TO-DO: calculate a testing a prediction and cost.
     print("Main program")
-    data = load_data('./Datos/TankTraining_clean_OHE.csv')
+    data = load_data('TankTraining_clean_OHE.csv')
     print(data)
     print(data.shape)
 
@@ -35,6 +35,8 @@ def main():
     X_test = scaler.transform(X_test_raw)
 
     print("Train:", X_train.shape, " Test:", X_test.shape)
+
+    mlp =MLP([61,10,8,6,5])
     
     
 main()
