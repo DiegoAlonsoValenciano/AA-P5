@@ -111,7 +111,10 @@ class MLP:
 	------
 	J (scalar): the cost.
     """
-    def compute_cost(self, yPrime,y, lambda_): # es una función interna por eso empieza por _
+    def compute_cost(self, yPrime,y, lambda_):
+        yp = np.array(yPrime)
+        print("yp: ", yp.shape)
+        print("y: ", y.shape)
         p1 = y * np.log(yPrime)
         p2 = (1 - y) * (np.log((1-yPrime)))
 
@@ -154,27 +157,58 @@ class MLP:
     grad1, grad2: the gradient matrix (same shape than theta1 and theta2)
     """
     def compute_gradients(self, x, y, lambda_):
-        a1,a2,a3,z2,z3 = self.feedforward(x)
+        a,z = self.feedforward(x)
 
-        J=self.compute_cost(a3,y,lambda_)
-        dlt3=a3-y
+        long = len(a)
+        J=self.compute_cost(a[long-1],y,lambda_)
         
-        dlt2=np.dot(dlt3,self.theta2)*self._sigmoidPrime(a2)
+        dlts = []
+        dltL=a[long-1]-y
+        print("dltL tamaño: ", dltL.shape)
+        dlts.append(dltL)
+
+        print("dltL tamaño: ", dltL.shape)
+        print("self.thetas[long-2]: ", self.thetas[long-2].shape)
+        dltL_1 = np.dot(dltL,self.thetas[long-2])*self._sigmoidPrime(a[long-2])
+        print("dltL_1 tamaño: ", dltL_1.shape)
+        dlts.append(dltL_1)
+
+        for i in range(long-3, 0, -1):
+            lng = len(dlts)
+            print("dlts[lng-1][:, 1:] tamaño: ", dlts[lng-1][:, 1:].shape)
+            print("self.thetas[i] tamaño: ", self.thetas[i].shape)
+            auxDlt =np.dot(dlts[lng-1][:, 1:],self.thetas[i])*self._sigmoidPrime(a[i])
+            print("auxDlt tamaño: ", auxDlt.shape)
+            dlts.append(auxDlt)
         
-        grad1=np.zeros(self.theta1.shape)
-        grad2=np.zeros(self.theta2.shape)
+        print("cantidad de deltas: ", len(dlts))
+
+        #dar la vuelta a la lista de deltas
+        invDlts =dlts[::-1]
+
+        grad = []
+        for i in range(long-1):
+            auxGrad = np.zeros(self.thetas[i].shape)
+            print("grad", i+1, "tamaño: ", auxGrad.shape)
+            grad.append(auxGrad)
 
         m = self._size(x)
 
-        g1=np.dot(dlt2[:, 1:].T,a1)/m
-        g2=np.dot(dlt3.T,a2)/m
+        g=[]
+        for i in range(long-2):
+            auxG = np.dot(invDlts[i][:, 1:].T,a[i])/m
+            print("g", i+1, "tamaño: ", auxG.shape)
+            g.append(auxG)
 
-        g1[:,1:] = g1[:,1:]+self._regularizationL2Gradient(self.theta1,lambda_,m)
-        grad1+= g1
-        g2[:,1:] = g2[:,1:]+self._regularizationL2Gradient(self.theta2,lambda_,m)
-        grad2+=g2
+        gL = np.dot(dltL.T,a[long-2])
+        print("gL tamaño: ", gL.shape)
+        g.append(gL)
 
-        return (J, grad1, grad2)
+        for i in range(long-1):
+            g[i][:,1:] = g[i][:,1:]+self._regularizationL2Gradient(self.thetas[i],lambda_,m)
+            grad[i]+=g[i]
+
+        return (J, grad)
     
     """
     Compute L2 regularization gradient
@@ -207,13 +241,15 @@ class MLP:
     """
 
     def _regularizationL2Cost(self, m, lambda_):
-        t1 =self.theta1[:, 1:]
-        t2= self.theta2[:, 1:]
-        t1=t1**2
-        t2=t2**2
-        t1=t1.sum()
-        t2=t2.sum()
-        L2= t1+t2
+        L2=0
+        rango = len(self.thetas)
+
+        for i in range(rango):
+            auxT = self.thetas[i][:, 1:]
+            auxT = auxT**2
+            auxT = auxT.sum()
+            L2 = L2+auxT
+
         L2= ((L2*lambda_)/(2*m))
         return L2
     
@@ -223,9 +259,10 @@ class MLP:
         for i in range(numIte):
             J = 0
             ##TO-DO: calculate gradients and update both theta matrix
-            J,g1,g2=self.compute_gradients(x, y, lambda_)
-            self.theta1-=alpha*g1
-            self.theta2-=alpha*g2
+            J,g=self.compute_gradients(x, y, lambda_)
+            long = len(g)
+            for i in range(long-1):
+                self.thetas[i]-=alpha*g[i]
             Jhistory.append(J)
             if verbose > 0 :
                 if i % verbose == 0 or i == (numIte-1):
