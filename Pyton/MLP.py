@@ -21,9 +21,9 @@ class MLP:
         for i in range(numL-1):
             ts = np.random.uniform(-epislom,epislom, [Layers[i+1],Layers[i]+1])
             self.thetas.append(ts)
-            print("theta",i,": ",ts," Tamaño: ",ts.shape)
+            #print("theta",i,": ",ts," Tamaño: ",ts.shape)
             
-        print("thetas: ", self.thetas)
+        #print("thetas: ", self.thetas)
 
         """
     Reset the theta matrix created in the constructor by both theta matrix manualy loaded.
@@ -82,19 +82,19 @@ class MLP:
         z = []
         a1 = np.hstack([np.ones((self._size(x), 1)), x])
         a.append(a1)
-        print("a1: ", a1.shape, "esperado: ", x.shape[0],"x", x.shape[1]+1)
+        #print("a1: ", a1.shape, "esperado: ", x.shape[0],"x", x.shape[1]+1)
         rango = len(self.thetas)
         for i in range(rango-1):
             auxZ = a[i] @ self.thetas[i].T
             auxA = self._sigmoid(auxZ)
             auxA = np.hstack([np.ones((self._size(auxA), 1)), auxA])
-            print("a", i+2, ": ", auxA.shape, "esperado: ", a[i].shape[0],"x", self.thetas[i].shape[0]+1)
+            #print("a", i+2, ": ", auxA.shape, "esperado: ", a[i].shape[0],"x", self.thetas[i].shape[0]+1)
             z.append(auxZ)
             a.append(auxA)
         
         auxZ = a[rango-1] @ self.thetas[rango-1].T
         auxA = self._sigmoid(auxZ)
-        print("a", rango+1, ": ", auxA.shape, "esperado: ", a[rango-1].shape[0],"x", self.thetas[rango-1].shape[0])
+        #print("a", rango+1, ": ", auxA.shape, "esperado: ", a[rango-1].shape[0],"x", self.thetas[rango-1].shape[0])
         z.append(auxZ)
         a.append(auxA)
         return a,z # devolvemos a parte de las activaciones, los valores sin ejecutar la función de activación
@@ -113,8 +113,8 @@ class MLP:
     """
     def compute_cost(self, yPrime,y, lambda_):
         yp = np.array(yPrime)
-        print("yp: ", yp.shape)
-        print("y: ", y.shape)
+        #print("yp: ", yp.shape)
+        #print("y: ", y.shape)
         p1 = y * np.log(yPrime)
         p2 = (1 - y) * (np.log((1-yPrime)))
 
@@ -164,24 +164,24 @@ class MLP:
         
         dlts = []
         dltL=a[long-1]-y
-        print("dltL tamaño: ", dltL.shape)
+        #print("dltL tamaño: ", dltL.shape)
         dlts.append(dltL)
 
-        print("dltL tamaño: ", dltL.shape)
-        print("self.thetas[long-2]: ", self.thetas[long-2].shape)
+        #print("dltL tamaño: ", dltL.shape)
+        #print("self.thetas[long-2]: ", self.thetas[long-2].shape)
         dltL_1 = np.dot(dltL,self.thetas[long-2])*self._sigmoidPrime(a[long-2])
-        print("dltL_1 tamaño: ", dltL_1.shape)
+        #print("dltL_1 tamaño: ", dltL_1.shape)
         dlts.append(dltL_1)
 
         for i in range(long-3, 0, -1):
             lng = len(dlts)
-            print("dlts[lng-1][:, 1:] tamaño: ", dlts[lng-1][:, 1:].shape)
-            print("self.thetas[i] tamaño: ", self.thetas[i].shape)
+            #print("dlts[lng-1][:, 1:] tamaño: ", dlts[lng-1][:, 1:].shape)
+            #print("self.thetas[i] tamaño: ", self.thetas[i].shape)
             auxDlt =np.dot(dlts[lng-1][:, 1:],self.thetas[i])*self._sigmoidPrime(a[i])
-            print("auxDlt tamaño: ", auxDlt.shape)
+            #print("auxDlt tamaño: ", auxDlt.shape)
             dlts.append(auxDlt)
         
-        print("cantidad de deltas: ", len(dlts))
+        #print("cantidad de deltas: ", len(dlts))
 
         #dar la vuelta a la lista de deltas
         invDlts =dlts[::-1]
@@ -189,7 +189,7 @@ class MLP:
         grad = []
         for i in range(long-1):
             auxGrad = np.zeros(self.thetas[i].shape)
-            print("grad", i+1, "tamaño: ", auxGrad.shape)
+            #print("grad", i+1, "tamaño: ", auxGrad.shape)
             grad.append(auxGrad)
 
         m = self._size(x)
@@ -197,11 +197,11 @@ class MLP:
         g=[]
         for i in range(long-2):
             auxG = np.dot(invDlts[i][:, 1:].T,a[i])/m
-            print("g", i+1, "tamaño: ", auxG.shape)
+            #print("g", i+1, "tamaño: ", auxG.shape)
             g.append(auxG)
 
         gL = np.dot(dltL.T,a[long-2])
-        print("gL tamaño: ", gL.shape)
+        #print("gL tamaño: ", gL.shape)
         g.append(gL)
 
         for i in range(long-1):
@@ -295,8 +295,9 @@ def costNN(Theta1, Theta2,x, ys, reg_param):
 mlp_backprop_predict 2 to be execute test 2
 """
 def MLP_backprop_predict(X_train,y_train, X_test, alpha, lambda_, num_ite, verbose):
-    mlp = MLP(X_train.shape[1],25,y_train.shape[1])
+    mlp = MLP([X_train.shape[1],59,47,35,23,11,5])
     Jhistory = mlp.backpropagation(X_train,y_train,alpha,lambda_,num_ite,verbose)
-    a3= mlp.feedforward(X_test)[2]
-    y_pred=mlp.predict(a3)
+    a,z= mlp.feedforward(X_test)
+    range =len(a)
+    y_pred=mlp.predict(a[range-1])
     return y_pred
