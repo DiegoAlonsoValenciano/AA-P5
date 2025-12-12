@@ -1,3 +1,4 @@
+using MLGym;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -40,6 +41,8 @@ public class MLAgent : MonoBehaviour
     private OneHotEncoding oneHotEncoding;
     private float _time;
 
+    Health vida;
+
 
     // Start is called before the first frame update
     void Start()
@@ -57,6 +60,7 @@ public class MLAgent : MonoBehaviour
             perception = GetComponent<PlayerPerception>();
             tankMove = GetComponent<TankMove>();
             tankFire = GetComponent<TankFire>();
+            vida = GetComponent<Health>();
             standarScaler = new StandarScaler(_standarScaler.text);
             oneHotEncoding = new OneHotEncoding(oHE_Elements);
             recorder.ResetInGame();
@@ -149,8 +153,13 @@ public class MLAgent : MonoBehaviour
             case ModelType.MLP:
                 action = 0;
                 //TODO leer de los parámetros de la percepción.
+                MLGym.Parameters p = PlayerPerception.ReadParameters(20,_time,perception,vida.health);
+
+                float[] modelInput = p.ConvertToFloatArray();
                 //Debe respetar el mismo orden que los datos.
                 //TODO Llamar a RunFeedForward
+                float[] outputs = RunFeedForward(modelInput);
+                action = mlpModel.Predict(outputs);
                 //guardar la toma de decisiones y despues validar si son correctas.
                 recorder.AIRecord(action);
                 break;
@@ -169,7 +178,7 @@ public class MLAgent : MonoBehaviour
         //permite eliminar columnas de la percepción si las habeis eliminado en el modelo.
         modelInput = modelInput.Where((value, index) => !indicesToRemove.Contains(index)).ToArray();
         //TODO Hacer las transformaciónes necesarias para ejecutar el modelo
-
+        modelInput=oneHotEncoding.Transform(modelInput);
         //Guardamos el model input con las trasformaciones para poder ejecutarlo desde paython y comporbar si funciona.
         recorder.AIRecord(modelInput);
         float[] outputs = this.mlpModel.FeedForward(modelInput);
