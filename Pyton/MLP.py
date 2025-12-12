@@ -165,26 +165,22 @@ class MLP:
         dlts = []
         dltL=a[long-1]-y
         #print("dltL tamaño: ", dltL.shape)
-        dlts.append(dltL)
+        dlts.insert(0,dltL)
 
         #print("dltL tamaño: ", dltL.shape)
         #print("self.thetas[long-2]: ", self.thetas[long-2].shape)
         dltL_1 = np.dot(dltL,self.thetas[long-2])*self._sigmoidPrime(a[long-2])
         #print("dltL_1 tamaño: ", dltL_1.shape)
-        dlts.append(dltL_1)
+        dlts.insert(0,dltL_1)
 
         for i in range(long-3, 0, -1):
-            lng = len(dlts)
             #print("dlts[lng-1][:, 1:] tamaño: ", dlts[lng-1][:, 1:].shape)
             #print("self.thetas[i] tamaño: ", self.thetas[i].shape)
-            auxDlt =np.dot(dlts[lng-1][:, 1:],self.thetas[i])*self._sigmoidPrime(a[i])
+            auxDlt =np.dot(dlts[0][:, 1:],self.thetas[i])*self._sigmoidPrime(a[i])
             #print("auxDlt tamaño: ", auxDlt.shape)
-            dlts.append(auxDlt)
+            dlts.insert(0,auxDlt)
         
         #print("cantidad de deltas: ", len(dlts))
-
-        #dar la vuelta a la lista de deltas
-        invDlts =dlts[::-1]
 
         grad = []
         for i in range(long-1):
@@ -196,13 +192,13 @@ class MLP:
 
         g=[]
         for i in range(long-2):
-            auxG = np.dot(invDlts[i][:, 1:].T,a[i])/m
+            auxG = np.dot(dlts[i][:, 1:].T,a[i])/m
             #print("g", i+1, "tamaño: ", auxG.shape)
             g.append(auxG)
 
         gL = np.dot(dltL.T,a[long-2])
         #print("gL tamaño: ", gL.shape)
-        g.append(gL)
+        g.append(gL/m)
 
         for i in range(long-1):
             g[i][:,1:] = g[i][:,1:]+self._regularizationL2Gradient(self.thetas[i],lambda_,m)
@@ -244,7 +240,7 @@ class MLP:
         L2=0
         rango = len(self.thetas)
 
-        for i in range(rango):
+        for i in range(rango-1):
             auxT = self.thetas[i][:, 1:]
             auxT = auxT**2
             auxT = auxT.sum()
@@ -260,9 +256,9 @@ class MLP:
             J = 0
             ##TO-DO: calculate gradients and update both theta matrix
             J,g=self.compute_gradients(x, y, lambda_)
-            long = len(g)
-            for i in range(long-1):
-                self.thetas[i]-=alpha*g[i]
+            long = len(self.thetas)
+            for j in range(long):
+                self.thetas[j]-=alpha*g[j]
             Jhistory.append(J)
             if verbose > 0 :
                 if i % verbose == 0 or i == (numIte-1):

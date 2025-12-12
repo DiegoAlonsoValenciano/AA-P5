@@ -58,3 +58,33 @@ def WriteStandardScaler(file,mean,var):
     line = line + str(var[len(var)-1])+ "\n"
     with open(file, 'w') as f:
         f.write(line)
+
+def confusionMatrix(P,Y):
+    TP=0
+    FP=0
+    TN=0
+    FN=0
+    for x in range(0,np.size(P)):
+        if P[x] == Y[x] and Y[x] == 0:
+            TP += 1
+        elif P[x] == Y[x] and Y[x] != 0:
+            TN += 1
+        elif Y[x] == 0:
+            FN += 1
+        else:
+            FP += 1
+
+    cm=np.array([[TP,FP],[FN,TN]])
+    return cm
+
+def precission(CM):
+    pr = CM[0][0]/(CM[0][0]+CM[0][1])
+    return pr
+
+def recall(CM):
+    rc = CM[0][0]/(CM[0][0]+CM[1][0])
+    return rc
+
+def F1_Score(pr,rc):
+    f1 = 2*((pr*rc)/(pr+rc))
+    return f1
