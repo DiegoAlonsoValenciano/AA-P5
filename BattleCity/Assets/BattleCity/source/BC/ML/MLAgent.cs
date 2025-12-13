@@ -153,12 +153,14 @@ public class MLAgent : MonoBehaviour
             case ModelType.MLP:
                 action = 0;
                 //TODO leer de los parámetros de la percepción.
+                //leer parametros de la percepcion
                 MLGym.Parameters p = PlayerPerception.ReadParameters(20,_time,perception,vida.health);
-
+                //pasarlos a array de float
                 float[] modelInput = p.ConvertToFloatArray();
                 //Debe respetar el mismo orden que los datos.
                 //TODO Llamar a RunFeedForward
                 float[] outputs = RunFeedForward(modelInput);
+                //hacer predict para ver que accion tomar
                 action = mlpModel.Predict(outputs);
                 //guardar la toma de decisiones y despues validar si son correctas.
                 recorder.AIRecord(action);
@@ -178,9 +180,13 @@ public class MLAgent : MonoBehaviour
         //permite eliminar columnas de la percepción si las habeis eliminado en el modelo.
         modelInput = modelInput.Where((value, index) => !indicesToRemove.Contains(index)).ToArray();
         //TODO Hacer las transformaciónes necesarias para ejecutar el modelo
+        //se hace oneHotEncoding al nuevo imput
         modelInput=oneHotEncoding.Transform(modelInput);
+        //se hace standarScaler 
+        modelInput=standarScaler.Transform(modelInput);
         //Guardamos el model input con las trasformaciones para poder ejecutarlo desde paython y comporbar si funciona.
         recorder.AIRecord(modelInput);
+        //se pasan por el FeedForward
         float[] outputs = this.mlpModel.FeedForward(modelInput);
 
         return outputs;

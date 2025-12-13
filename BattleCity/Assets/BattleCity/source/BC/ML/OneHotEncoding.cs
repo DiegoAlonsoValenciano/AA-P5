@@ -43,6 +43,24 @@ public class OneHotEncoding
         for (int i = 0; i < input.Length; i++)
         {
             //TODO implementar el OHE.
+            if (extraElements.ContainsKey(i))
+            {
+                for(int j = 0; j< extraElements.GetValueOrDefault(i); j++)
+                {
+                    if (input[i] == j)
+                    {
+                        output.Add(1);
+                    }
+                    else
+                    {
+                        output.Add(0);
+                    }
+                }
+            }
+            else
+            {
+                output.Add(input[i]);
+            }
         }
         return output.ToArray();
     }
