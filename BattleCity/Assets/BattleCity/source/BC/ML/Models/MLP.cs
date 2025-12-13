@@ -92,12 +92,9 @@ public class MLPModel
         //sacamos la ultima z al hacer dot product con la theta y sesgo correspondiente
         float[] zL = dot(aX, thetas[nT-1], sesgos[nT - 1]);
 
-        float[] aL = new float[zL.Length];
-        //pasamos la ultima z por la funcion de activacion (sigmodial)
-        for (int i = 0; i < aL.Length; i++)
-        {
-            aL[i] = sigmoid(zL[i]);
-        }
+        //hacemos softMax en la ultima capa
+        float[] aL = SoftMax(zL);
+        
 
         //the size of the output layer depends on what actions you have performed in the game.
         //By default it is 7 (number of possible actions) but some actions may not have been performed and therefore the model has assumed that they do not exist.
@@ -157,7 +154,22 @@ public class MLPModel
     public float[] SoftMax(float[] zArr)
     {
         //TODO implementar
-        return zArr;
+        float[] e = new float[zArr.Length];
+        float[] dev = new float[zArr.Length];
+        float sum = 0;
+        for (int i = 0; i < zArr.Length; i++)
+        {
+            float el = Mathf.Exp(zArr[i]);
+            e[i] = el;
+            sum+= el;
+        }
+
+        for(int i = 0; i < dev.Length; i++)
+        {
+            dev[i]= e[i]/sum;
+        }
+
+        return dev;
     }
 
     /// <summary>
@@ -181,7 +193,7 @@ public class MLPModel
     public int GetIndexMaxValue(float[] output, out float max)
     {
         max = output[0];
-        int index = 0;
+        int index = 0;//busca cual es el mayor valor y devuelve el indice
         for(int i = 1; i < output.Length; i++)
         {
             if (output[i] > max)

@@ -32,7 +32,7 @@ public class StandarScaler
     {
         float[] scaled = new float[a_input.Length];
         //TODO implementar
-        for(int i = 0; i < scaled.Length; i++)
+        for(int i = 0; i < scaled.Length; i++)//se aplica el standarScaler a cada valor dependiendo de la media y la desviacion tipica guardada
         {
             scaled[i] = (a_input[i]-mean[i])/std[i];
         }

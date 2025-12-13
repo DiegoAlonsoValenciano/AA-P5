@@ -40,24 +40,24 @@ public class OneHotEncoding
     public float[] Transform(float[] input)
     {
         List<float> output = new List<float>();
-        for (int i = 0; i < input.Length; i++)
+        for (int i = 0; i < input.Length; i++)//recorrer input
         {
             //TODO implementar el OHE.
-            if (extraElements.ContainsKey(i))
+            if (extraElements.ContainsKey(i))//si la posicion esta en la lista para aplicar oneHotEncoding
             {
-                for(int j = 0; j< extraElements.GetValueOrDefault(i); j++)
+                for(int j = 0; j< extraElements.GetValueOrDefault(i); j++)//bucle del tamaño en el que se tiene que hacer oneHotEncoding
                 {
-                    if (input[i] == j)
+                    if (input[i] == j)//si el valor de input es el mismo que la columna se añade 1
                     {
                         output.Add(1);
                     }
-                    else
+                    else//si no se añade 0
                     {
                         output.Add(0);
                     }
                 }
             }
-            else
+            else//si no hay que hacer oneHotEncoding se añade como esta
             {
                 output.Add(input[i]);
             }
